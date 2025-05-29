@@ -1,18 +1,17 @@
 BioNumera
+
 Repository for Bioinformatics and Numerical Analysis in Biological Research
+
 Welcome to BioNumera! This repository is dedicated to the integration of bioinformatics and numerical analysis in biological research. It contains code, data, and documentation for projects focused on analyzing and interpreting biological data through quantitative methods.
 Key Features
+
 Bioinformatics Analysis: Tools and scripts for processing and analyzing biological datasets.
 Numerical Methods: Implementation of statistical and mathematical techniques for data analysis.
+
 Data Visualization: Scripts for creating visual representations of complex biological data.
 Reproducibility: Detailed documentation and workflows to ensure results can be replicated.
 Usage
-To get started with this repository:
-Clone the repository to your local machine.
-Explore the directories for specific projects and datasets.
-Refer to the documentation files for detailed instructions on running analyses.
-Contribution
-We welcome contributions from the research community. If you are interested in contributing, please review our contribution guidelines.
+
 License
 This repository is licensed under the MIT License. Feel free to use, modify, and distribute the code as needed for your research.
 Contact
