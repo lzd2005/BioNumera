@@ -1,0 +1,105 @@
+---
+title: "Untitled"
+author: "lly"
+date: "2025-05-30"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+🔍 1. 数据描述与预处理
+```{r }
+library(readxl)
+library(dplyr)
+
+# 载入数据
+data <- read_excel("data//raw//journal.pone.0258761.s010.xlsx")
+# 将F列及之后的列转换为数值类型
+data[, 6:ncol(data)] <- sapply(data[, 6:ncol(data)], function(x) as.numeric(as.character(x)))
+
+# 查看转换后的数据
+head(data)
+# 查看基本信息
+str(data)
+summary(data)
+```
+
+📊 2. 单因素统计分析（ANOVA + Tukey HSD）
+用于比较 10 个 phytogeographic zone 之间形态特征差异：
+```{r }
+library(ggplot2)
+library(emmeans)
+
+# 示例：对 withers height 进行方差分析和多重比较
+anova_model <- aov(WH ~ PHZ, data = data)
+summary(anova_model)
+emmeans(anova_model, pairwise ~ PHZ)  # Tukey HSD 多重比较
+```
+📏 3. 形态指数计算（根据 Table 3）
+```{r }
+data <- data %>%
+  mutate(
+    MI = BW * 100 / WH,
+    IGS = (WH - CD) / CD,
+    IAT = EL / CD,
+    USI = (WH - CD) * 100 / WH,
+    BI = CC * 100 / HG,
+    IP = RW * 100 / RL,
+    CDI = CD * 100 / WH,
+    SI = WH / BL * 100,
+    Ba = (RL * RW) / (CD * CW),
+    IBR = BL * 100 / HG,
+    PI = ((SH + RH) / 2) / SH,
+    IC = HW * 100 / HL,
+    BR = SH / RH,
+    TD = HG / SH
+  ) 
+```
+📉 4. Stepwise Discriminant Analysis（逐步判别分析）
+```{r }
+library(MASS)
+quant_vars <- data %>%
+  #select(where(is.numeric)) %>%
+  dplyr::select(-ID_troup,-ID_animal,-Vegz,-Loc
+)  # 可根据需要排除某些变量
+
+# 添加分组信息
+quant_vars$PHZ <- as.factor(data$PHZ)
+
+# 使用 stepwise LDA（可自定义变量选择）
+lda_fit <- lda(PHZ ~ ., data = quant_vars)
+
+
+plot(predict(lda_fit)$x, col = quant_vars$PHZ, pch = 19,
+     main = "Canonical Discriminant Analysis (CDA)")
+```
+🌳 5. Ascending Hierarchical Clustering（AHC）
+```{r }
+library(cluster)
+library(factoextra)
+
+# 数据标准化
+#scaled_data <- scale(quant_vars[, -ncol(quant_vars)])
+
+# 距离矩阵 & 层次聚类
+d <- dist(quant_vars)
+hc <- hclust(d, method = "ward.D2")
+
+# 树状图
+plot(hc, labels = FALSE, main = "Hierarchical Clustering Dendrogram")
+```
+🎯 6. Multiple Correspondence Analysis（MCA）
+用于定性变量（如毛色、耳型等）
+```{r }
+library(FactoMineR)
+library(factoextra)
+
+qual_vars <- data %>%
+  dplyr::select( CC, HL, EO, BP) %>%
+  mutate_all(as.factor)
+
+mca_res <- MCA(qual_vars, graph = FALSE)
+fviz_mca_biplot(mca_res, repel = TRUE)
+```
